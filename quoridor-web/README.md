@@ -101,7 +101,7 @@ Once both servers are running, open your web browser and navigate to:
 
 **http://localhost:8080**
 
-Click on **"Player vs Bot"** to start a game. When you make a move, the browser will send the game state to your AI server, which will then respond with the AI's move. You can see the communication logs in the AI Server terminal.
+When you make a move, the browser will send the game state to `ai_server.py`, which will then respond with the AI's move.
 
 
 ### TODO
