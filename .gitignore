@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 quoridor-web/CHANGELOG.md
 .DS_Store
+.venv/
