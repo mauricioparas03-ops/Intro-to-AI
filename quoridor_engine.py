@@ -85,7 +85,7 @@ class Board:
         Blocks the edges  (c, r)↔(c+1, r)  and  (c, r+1)↔(c+1, r+1).
     """
 
-    SIZE = 9  # cells per side (0..8)
+    SIZE = 9 # cells per side (0..8)
 
     def __init__(self) -> None:
         self.h_walls: set[tuple[int, int]] = set()  # horizontal wall anchors
