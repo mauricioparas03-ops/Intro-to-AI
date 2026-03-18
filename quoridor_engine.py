@@ -285,16 +285,34 @@ class Game:
                 if straight_ok:
                     valid.append((jc, jr))
                 else:
+                    # Diagonal moves depend on direction of approach
+                    if dc == 0:  # coming vertically → diagonals are left/right
+                        for ldc in (-1, 1):
+                            lc, lr = nc + ldc, nr
+                            if (
+                                board._in_bounds(lc, lr)
+                                and board.is_passage_open((nc, nr), (lc, lr))
+                            ):
+                                valid.append((lc, lr))
+                    else:  # coming horizontally → diagonals are up/down
+                        for ldr in (-1, 1):
+                            lc, lr = nc, nr + ldr
+                            if (
+                                board._in_bounds(lc, lr)
+                                and board.is_passage_open((nc, nr), (lc, lr))
+                            ):
+                                valid.append((lc, lr))
+                #else:
                     # Try lateral (diagonal) jumps
-                    for ldc, ldr in ((0, 1), (0, -1), (1, 0), (-1, 0)):
-                        if (ldc, ldr) == (dc, dr) or (ldc, ldr) == (-dc, -dr):
-                            continue  # skip forward/backward directions
-                        lc, lr = nc + ldc, nr + ldr
-                        if (
-                            board._in_bounds(lc, lr)
-                            and board.is_passage_open((nc, nr), (lc, lr))
-                        ):
-                            valid.append((lc, lr))
+                    #for ldc, ldr in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                     #   if (ldc, ldr) == (dc, dr) or (ldc, ldr) == (-dc, -dr):
+                      #      continue  # skip forward/backward directions
+                       # lc, lr = nc + ldc, nr + ldr
+                        #if (
+                         #   board._in_bounds(lc, lr)
+                          #  and board.is_passage_open((nc, nr), (lc, lr))
+                        #):
+                          #  valid.append((lc, lr))
 
         # Deduplicate while preserving order
         seen: set[tuple[int, int]] = set()

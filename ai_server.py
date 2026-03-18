@@ -6,6 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from quoridor_5x5_env import GameState5x5, get_next_states
 
 app = FastAPI()
 
@@ -22,6 +23,14 @@ app.add_middleware(
 SERVER_MODE = "ai"
 
 class GameState(BaseModel):
+    p1_pos: list[int]
+    p2_pos: list[int]
+    walls: list[list[int]]
+    turn: int
+    p1_walls_remaining: int
+    p2_walls_remaining: int
+
+#class GameState(BaseModel):
     p1_pos: list[int]
     p2_pos: list[int]
     walls: list[list[int]]
@@ -69,7 +78,42 @@ def get_manual_move(state: GameState):
         except Exception as e:
             print(f"Error: {e}")
 
+from ai_agent import choose_ai_move
+
 def get_ai_move(state: GameState):
+    print(f"AI Thinking... (Turn: {state.turn}, P1: {state.p1_pos}, P2: {state.p2_pos})")
+
+    # construir el estado usando la clase de tu compañero
+    game_state = GameState5x5(
+        p1_pos=state.p1_pos,
+        p2_pos=state.p2_pos,
+        p1_walls=state.p1_walls,
+        p2_walls=state.p2_walls,
+        h_walls=state.h_walls,
+        v_walls=state.v_walls,
+        turn=state.turn
+    )
+
+    next_states = get_next_states(game_state)
+
+    if not next_states:
+        raise RuntimeError("No possible next states for AI.")
+
+    # por ahora elegimos el primero
+    chosen = next_states[0]["action"]
+
+    if chosen["type"] == "move":
+        return {
+            "action_type": "move",
+            "coordinates": list(chosen["pos"])
+        }
+    else:
+        return {
+            "action_type": "wall",
+            "coordinates": list(chosen["pos"]),
+            "orientation": "horizontal" if chosen["orientation"] == "h" else "vertical"
+        }
+#def get_ai_move(state: GameState):
     print(f"AI Thinking... (Turn: {state.turn}, P1: {state.p1_pos}, P2: {state.p2_pos})")
     
     # TODO 
