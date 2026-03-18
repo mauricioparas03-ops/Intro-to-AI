@@ -56,17 +56,24 @@ def evaluate_state(state, ai_player_id):
     return score
 
 
-def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, stats, use_pruning=True):
+def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, stats=None, use_pruning=True):
     """
-    stats: A dictionary to track {'visited': 0, 'pruned': 0}
-    use_pruning: Toggle to turn Alpha-Beta off to see the difference.
+    Returns (best_score, best_action).
+    stats and use_pruning are optional so it doesn't break the main game UI.
     """
+    # CRITICAL FIX: This initializes the dictionary if the UI didn't provide one
+    if stats is None:
+        stats = {'visited': 0, 'pruned': 0}
+        
     stats['visited'] += 1
     
+    # 1. Base Case: Reached maximum depth or the game is over
     if depth == 0 or state.p1_pos[1] == 4 or state.p2_pos[1] == 0:
         return evaluate_state(state, ai_player_id), None
 
     possible_moves = get_next_states(state)
+    
+    # If no moves are possible (edge case), evaluate current
     if not possible_moves:
         return evaluate_state(state, ai_player_id), None
 
@@ -76,7 +83,14 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
         max_eval = float('-inf')
         for move_dict in possible_moves:
             eval_score, _ = alpha_beta_search(
-                move_dict["state"], depth - 1, alpha, beta, False, ai_player_id, stats, use_pruning
+                move_dict["state"], 
+                depth - 1, 
+                alpha, 
+                beta, 
+                False, # Next turn is the opponent's (minimizing)
+                ai_player_id,
+                stats,
+                use_pruning
             )
             
             if eval_score > max_eval:
@@ -87,15 +101,22 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
                 alpha = max(alpha, eval_score)
                 if beta <= alpha:
                     stats['pruned'] += 1
-                    break # PRUNE!
-                    
+                    break # Prune! The opponent won't let us get this far.
+                
         return max_eval, best_action
 
     else:
         min_eval = float('inf')
         for move_dict in possible_moves:
             eval_score, _ = alpha_beta_search(
-                move_dict["state"], depth - 1, alpha, beta, True, ai_player_id, stats, use_pruning
+                move_dict["state"], 
+                depth - 1, 
+                alpha, 
+                beta, 
+                True, # Next turn is the AI's (maximizing)
+                ai_player_id,
+                stats,
+                use_pruning
             )
             
             if eval_score < min_eval:
@@ -106,6 +127,6 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
                 beta = min(beta, eval_score)
                 if beta <= alpha:
                     stats['pruned'] += 1
-                    break # PRUNE!
-                    
+                    break # Prune! We wouldn't let the opponent get this far.
+                
         return min_eval, best_action
