@@ -23,7 +23,7 @@ def get_shortest_path_distance(state, start_pos, goal_row):
                     visited.add((nc, nr))
                     queue.append(((nc, nr), dist + 1))
     
-    return float('inf') # Should theoretically never happen if get_next_states works correctly
+    return float('inf') 
 
 def evaluate_state(state, ai_player_id):
     """
@@ -43,10 +43,9 @@ def evaluate_state(state, ai_player_id):
     opp_dist = get_shortest_path_distance(state, opp_pos, opp_goal)
     
     # Base score: Opponent's distance minus my distance
-    # (If opp is 6 steps away and I am 2 steps away, score is +4)
     score = opp_dist - my_dist
     
-    # Small tie-breaker: Having more walls in reserve is slightly better
+    # Small tie-breaker. Gives slightly bigger weight to having more walls. 
     score += (my_walls - opp_walls) * 0.1 
     
     # Check for immediate win/loss conditions
@@ -59,15 +58,15 @@ def evaluate_state(state, ai_player_id):
 def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, stats=None, use_pruning=True):
     """
     Returns (best_score, best_action).
-    stats and use_pruning are optional so it doesn't break the main game UI.
+    stats and use_pruning are optional if you want to track search statistics.
     """
-    # CRITICAL FIX: This initializes the dictionary if the UI didn't provide one
+
     if stats is None:
         stats = {'visited': 0, 'pruned': 0}
         
     stats['visited'] += 1
     
-    # 1. Base Case: Reached maximum depth or the game is over
+    #Reached maximum depth or the game is over
     if depth == 0 or state.p1_pos[1] == 4 or state.p2_pos[1] == 0:
         return evaluate_state(state, ai_player_id), None
 
@@ -87,7 +86,7 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
                 depth - 1, 
                 alpha, 
                 beta, 
-                False, # Next turn is the opponent's (minimizing)
+                False, # Oponnents turn - minimizing
                 ai_player_id,
                 stats,
                 use_pruning
@@ -101,7 +100,7 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
                 alpha = max(alpha, eval_score)
                 if beta <= alpha:
                     stats['pruned'] += 1
-                    break # Prune! The opponent won't let us get this far.
+                    break # Prune branch.
                 
         return max_eval, best_action
 
@@ -113,7 +112,7 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
                 depth - 1, 
                 alpha, 
                 beta, 
-                True, # Next turn is the AI's (maximizing)
+                True, # AI turn - maximizing 
                 ai_player_id,
                 stats,
                 use_pruning
@@ -127,6 +126,6 @@ def alpha_beta_search(state, depth, alpha, beta, is_maximizing, ai_player_id, st
                 beta = min(beta, eval_score)
                 if beta <= alpha:
                     stats['pruned'] += 1
-                    break # Prune! We wouldn't let the opponent get this far.
+                    break # Prune branch.
                 
         return min_eval, best_action
